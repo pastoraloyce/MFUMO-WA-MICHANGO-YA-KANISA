@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="sw">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kuingia - Disciples Community Church Kisesa</title>
+    <style>
+        :root {
+            --primary-green: #0d3b2e;
+            --secondary-green: #1b5e4b;
+            --accent-gold: #c59b27;
+            --gold-hover: #b0871e;
+            --bg-light: #f4f7f6;
+            --card-bg: #ffffff;
+            --text-dark: #2b2d42;
+            --text-muted: #6c757d;
+            --error-red: #d9534f;
+            --border-color: #e2e8f0;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, rgba(13, 59, 46, 0.95), rgba(10, 35, 28, 0.92)),
+                        radial-gradient(circle at top right, rgba(197, 155, 39, 0.15), transparent 40%);
+            background-color: var(--primary-green);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .login-card {
+            background: var(--card-bg);
+            width: 100%;
+            max-width: 440px;
+            border-radius: 16px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+            padding: 40px 32px;
+            position: relative;
+            border-top: 5px solid var(--accent-gold);
+        }
+
+        .header-section {
+            text-align: center;
+            margin-bottom: 28px;
+        }
+
+        .logo-wrapper {
+            width: 70px;
+            height: 70px;
+            background: rgba(13, 59, 46, 0.05);
+            border: 2px solid var(--accent-gold);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 16px;
+            color: var(--primary-green);
+        }
+
+        .logo-wrapper svg {
+            width: 36px;
+            height: 36px;
+            fill: currentColor;
+        }
+
+        .church-title {
+            font-size: 1.1rem;
+            font-weight: 800;
+            color: var(--primary-green);
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            line-height: 1.3;
+        }
+
+        .subtitle {
+            font-size: 0.88rem;
+            color: var(--accent-gold);
+            font-weight: 600;
+            margin-top: 6px;
+            text-transform: capitalize;
+        }
+
+        .alert-message {
+            background-color: #fde8e8;
+            border: 1px solid #f8b4b4;
+            color: var(--error-red);
+            padding: 10px 14px;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            margin-bottom: 20px;
+            display: none;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-dark);
+            margin-bottom: 8px;
+        }
+
+        .input-wrapper {
+            position: relative;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px 16px;
+            font-size: 0.95rem;
+            border: 1.5px solid var(--border-color);
+            border-radius: 8px;
+            outline: none;
+            transition: all 0.25s ease;
+            color: var(--text-dark);
+            background-color: #fafafa;
+        }
+
+        .form-control:focus {
+            border-color: var(--primary-green);
+            background-color: #ffffff;
+            box-shadow: 0 0 0 4px rgba(13, 59, 46, 0.1);
+        }
+
+        .toggle-password {
+            position: absolute;
+            right: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: var(--text-muted);
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .form-options {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.83rem;
+            margin-bottom: 24px;
+        }
+
+        .remember-me {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            color: var(--text-muted);
+        }
+
+        .remember-me input {
+            accent-color: var(--primary-green);
+            width: 16px;
+            height: 16px;
+        }
+
+        .forgot-link {
+            color: var(--secondary-green);
+            text-decoration: none;
+            font-weight: 600;
+            transition: color 0.2s;
+        }
+
+        .forgot-link:hover {
+            color: var(--accent-gold);
+            text-decoration: underline;
+        }
+
+        .btn-submit {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, var(--primary-green), var(--secondary-green));
+            color: #ffffff;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(13, 59, 46, 0.25);
+            transition: all 0.3s ease;
+        }
+
+        .btn-submit:hover {
+            background: linear-gradient(135deg, #092c22, var(--primary-green));
+            box-shadow: 0 6px 16px rgba(13, 59, 46, 0.35);
+            transform: translateY(-1px);
+        }
+
+        .contact-box {
+            margin-top: 28px;
+            padding: 12px;
+            background-color: var(--bg-light);
+            border-radius: 8px;
+            text-align: center;
+            font-size: 0.83rem;
+            color: var(--text-muted);
+            border: 1px dashed var(--border-color);
+        }
+
+        .contact-box strong {
+            color: var(--primary-green);
+        }
+
+        .footer-credits {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 0.78rem;
+            color: var(--text-muted);
+        }
+
+        .footer-credits strong {
+            color: var(--accent-gold);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="login-card">
+        <div class="header-section">
+            <div class="logo-wrapper">
+                <svg viewBox="0 0 24 24">
+                    <path d="M11 2h2v7h7v2h-7v11h-2V11H4V9h7V2z"/>
+                </svg>
+            </div>
+            <h1 class="church-title">Disciples Community Church<br>Kisesa, Mwanza</h1>
+            <p class="subtitle">Michango ya Ununuzi wa Kiwanja</p>
+        </div>
+
+        <div id="alertBox" class="alert-message">
+            <span>⚠️</span> <span id="alertText">Tafadhali jaza namba ya simu na nenosiri.</span>
+        </div>
+
+        <form id="loginForm" novalidate>
+            <div class="form-group">
+                <label for="username">Jina la Mtumiaji / Namba ya Simu</label>
+                <input type="text" id="username" class="form-control" placeholder="Mfano: 0757344860" required>
+            </div>
+
+            <div class="form-group">
+                <label for="password">Nenosiri</label>
+                <div class="input-wrapper">
+                    <input type="password" id="password" class="form-control" placeholder="Ingiza nenosiri lako" required>
+                    <button type="button" class="toggle-password" id="togglePassword">Onyesha</button>
+                </div>
+            </div>
+
+            <div class="form-options">
+                <label class="remember-me">
+                    <input type="checkbox" id="remember">
+                    <span>Nikumbuke</span>
+                </label>
+                <a href="#" class="forgot-link" onclick="alert('Tafadhali wasiliana na msimamizi wa mfumo ili kubadilisha nenosiri.')">Umesahau Nenosiri?</a>
+            </div>
+
+            <button type="submit" class="btn-submit">INGIA / LOGIN</button>
+        </form>
+
+        <div class="contact-box">
+            Msaada au Maswali: <strong>0757 344 860</strong>
+        </div>
+
+        <div class="footer-credits">
+            Designed by <strong>Pastor Aloyce</strong>
+        </div>
+    </div>
+
+    <script>
+        const passwordInput = document.getElementById('password');
+        const togglePasswordBtn = document.getElementById('togglePassword');
+        const loginForm = document.getElementById('loginForm');
+        const alertBox = document.getElementById('alertBox');
+        const alertText = document.getElementById('alertText');
+
+        // Toggle Password Visibility
+        togglePasswordBtn.addEventListener('click', function () {
+            const isPassword = passwordInput.type === 'password';
+            passwordInput.type = isPassword ? 'text' : 'password';
+            this.textContent = isPassword ? 'Ficha' : 'Onyesha';
+        });
+
+        // Form Submission & Basic Validation
+        loginForm.addEventListener('submit', function (e) {
+            e.preventDefault();
+            
+            const username = document.getElementById('username').value.trim();
+            const password = passwordInput.value.trim();
+
+            if (!username || !password) {
+                showAlert('Tafadhali jaza namba ya simu na nenosiri kwanza.');
+                return;
+            }
+
+            // Demo Error Handling (Replace this block with real backend authentication API)
+            if (username !== '0757344860' || password !== '123456') {
+                showAlert('Taarifa ulizoingiza si sahihi. Jaribu tena au wasiliana na msimamizi.');
+            } else {
+                alertBox.style.display = 'none';
+                alert('Umeingia kikamilifu kwenye mfumo!');
+            }
+        });
+
+        function showAlert(message) {
+            alertText.textContent = message;
+            alertBox.style.display = 'flex';
+        }
+    </script>
+</body>
+</html>
