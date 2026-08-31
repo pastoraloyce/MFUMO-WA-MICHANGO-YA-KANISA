@@ -1,0 +1,907 @@
+<!DOCTYPE html>
+<html lang="sw">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DCC BUILDING & LAND CONTRIBUTION SYSTEM</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- Tailwind Config -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        navy: '#0f172a',
+                        gold: '#eab308',
+                        orange: '#f97316',
+                        light: '#f8fafc'
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        heading: ['Poppins', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body { background-color: #f8fafc; }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.07);
+        }
+        .gradient-text {
+            background: linear-gradient(to right, #eab308, #f97316);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .gradient-bg {
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+        }
+        
+        /* Animations */
+        @keyframes fade-in { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .animate-fade-in { animation: fade-in 0.5s ease-out forwards; }
+        
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+        /* Print Styles */
+        @media print {
+            body * { visibility: hidden; }
+            #receipt-modal, #receipt-modal * { visibility: visible; }
+            #receipt-modal { position: absolute; left: 0; top: 0; width: 100%; box-shadow: none; }
+            .no-print { display: none !important; }
+        }
+
+        /* Hide views by default */
+        .view-section { display: none; }
+        .view-section.active { display: block; animation: fade-in 0.4s ease-out; }
+    </style>
+</head>
+<body class="text-slate-800 antialiased flex flex-col md:flex-row min-h-screen">
+
+    <!-- Desktop Sidebar -->
+    <aside class="hidden md:flex flex-col w-64 gradient-bg text-white shadow-xl fixed h-full z-20 no-print">
+        <div class="p-6 border-b border-slate-700 text-center">
+            <div class="w-16 h-16 bg-white/10 rounded-full flex items-center justify-center mx-auto mb-3 text-gold text-2xl">
+                <i class="fas fa-church"></i>
+            </div>
+            <h2 class="font-heading font-bold text-lg tracking-wider text-gold">DCC</h2>
+            <p class="text-xs text-slate-300">KISESA - MWANZA</p>
+        </div>
+        <nav class="flex-1 overflow-y-auto py-4">
+            <ul class="space-y-1 px-3">
+                <li><a href="#" onclick="navigate('home')" class="nav-item flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-white/10 transition text-sm text-slate-300 hover:text-white"><i class="fas fa-home w-5"></i> Dashboard</a></li>
+                <li><a href="#" onclick="navigate('form')" class="nav-item flex items-center gap-3 px-4 py-3 rounded-lg bg-orange text-white font-medium hover:bg-orange-600 transition text-sm shadow-lg shadow-orange/30 my-2"><i class="fas fa-hand-holding-heart w-5"></i> Toa Mchango</a></li>
+                <li><a href="#" onclick="navigate('contributors')" class="nav-item flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-white/10 transition text-sm text-slate-300 hover:text-white"><i class="fas fa-users w-5"></i> Wachangiaji</a></li>
+                <li><a href="#" onclick="navigate('reports')" class="nav-item flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-white/10 transition text-sm text-slate-300 hover:text-white"><i class="fas fa-chart-bar w-5"></i> Ripoti</a></li>
+            </ul>
+        </nav>
+        <div class="p-4 border-t border-slate-700">
+            <a href="#" onclick="navigate('login')" class="flex items-center gap-3 px-4 py-2 rounded-lg hover:bg-white/10 transition text-sm text-slate-400">
+                <i class="fas fa-lock w-5"></i> Admin Login
+            </a>
+        </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="flex-1 md:ml-64 pb-20 md:pb-0 min-h-screen">
+        
+        <!-- Mobile Header -->
+        <header class="md:hidden gradient-bg text-white p-4 sticky top-0 z-30 shadow-md no-print flex justify-between items-center">
+            <div class="flex items-center gap-3">
+                <i class="fas fa-church text-gold text-xl"></i>
+                <div>
+                    <h1 class="font-heading font-bold text-sm">DCC KISESA</h1>
+                </div>
+            </div>
+            <button onclick="navigate('login')" class="text-slate-300"><i class="fas fa-lock"></i></button>
+        </header>
+
+        <div class="p-4 md:p-8 max-w-7xl mx-auto">
+
+            <!-- ================= VIEW: HOME ================= -->
+            <section id="view-home" class="view-section active">
+                <!-- Hero Banner -->
+                <div class="gradient-bg rounded-2xl p-6 md:p-10 text-white shadow-xl mb-8 relative overflow-hidden">
+                    <div class="relative z-10">
+                        <span class="inline-block px-3 py-1 bg-gold/20 text-gold rounded-full text-xs font-semibold mb-4 border border-gold/30">TUJENGE NYUMBA YA MUNGU PAMOJA</span>
+                        <h2 class="text-2xl md:text-4xl font-heading font-bold mb-3 leading-tight">Changia Ununuzi wa Kiwanja & Ujenzi wa Kanisa</h2>
+                        <p class="text-slate-300 mb-6 max-w-2xl text-sm italic border-l-4 border-gold pl-4">"Hata hivyo, kila mtu na atende kama alivyokusudia moyoni mwake, si kwa huzuni, wala si kwa kulazimishwa; maana Mungu humpenda yeye atoaye kwa moyo wa ukunjufu." - 2 Wakorintho 9:7</p>
+                        <div class="flex flex-wrap gap-4">
+                            <button onclick="navigate('form')" class="bg-orange hover:bg-orange-600 text-white px-6 py-3 rounded-full font-semibold transition shadow-lg shadow-orange/30 transform hover:scale-105">Toa Mchango Sasa <i class="fas fa-arrow-right ml-2"></i></button>
+                            <button onclick="navigate('contributors')" class="bg-white/10 hover:bg-white/20 text-white px-6 py-3 rounded-full font-semibold transition border border-white/20">Ona Wachangiaji</button>
+                        </div>
+                    </div>
+                    <i class="fas fa-building absolute -right-10 -bottom-10 text-9xl text-white opacity-5"></i>
+                </div>
+
+                <!-- Summary Cards -->
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+                    <div class="glass-card rounded-2xl p-5 border-t-4 border-gold text-center transform transition hover:-translate-y-1">
+                        <div class="text-slate-400 text-xs font-semibold mb-1 uppercase tracking-wider">Jumla Michango</div>
+                        <div class="text-xl md:text-2xl font-bold text-navy" id="dash-total">TZS 0</div>
+                    </div>
+                    <div class="glass-card rounded-2xl p-5 border-t-4 border-orange text-center transform transition hover:-translate-y-1">
+                        <div class="text-slate-400 text-xs font-semibold mb-1 uppercase tracking-wider">Kiwanja</div>
+                        <div class="text-xl md:text-2xl font-bold text-orange" id="dash-land">TZS 0</div>
+                    </div>
+                    <div class="glass-card rounded-2xl p-5 border-t-4 border-navy text-center transform transition hover:-translate-y-1">
+                        <div class="text-slate-400 text-xs font-semibold mb-1 uppercase tracking-wider">Ujenzi</div>
+                        <div class="text-xl md:text-2xl font-bold text-navy" id="dash-build">TZS 0</div>
+                    </div>
+                    <div class="glass-card rounded-2xl p-5 border-t-4 border-emerald-500 text-center transform transition hover:-translate-y-1">
+                        <div class="text-slate-400 text-xs font-semibold mb-1 uppercase tracking-wider">Wachangiaji</div>
+                        <div class="text-xl md:text-2xl font-bold text-emerald-600" id="dash-count">0</div>
+                    </div>
+                </div>
+
+                <!-- Progress Section -->
+                <div class="grid md:grid-cols-2 gap-6 mb-8">
+                    <!-- Land Progress -->
+                    <div class="glass-card rounded-2xl p-6">
+                        <div class="flex justify-between items-center mb-4">
+                            <h3 class="font-heading font-bold text-navy"><i class="fas fa-map-marked-alt text-orange mr-2"></i> Lengo la Kiwanja</h3>
+                            <span class="text-xs font-bold bg-orange/10 text-orange px-2 py-1 rounded" id="land-percent">0%</span>
+                        </div>
+                        <div class="flex justify-between text-sm mb-2">
+                            <span class="text-slate-500" id="land-collected">TZS 0</span>
+                            <span class="font-semibold text-slate-700" id="land-target-text">Lengo: TZS 30,000,000</span>
+                        </div>
+                        <div class="w-full bg-slate-100 rounded-full h-3 mb-2 overflow-hidden shadow-inner">
+                            <div class="bg-gradient-to-r from-orange to-gold h-3 rounded-full transition-all duration-1000 relative" id="land-bar" style="width: 0%">
+                                <div class="absolute top-0 left-0 w-full h-full bg-white/20 animate-pulse"></div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Building Progress -->
+                    <div class="glass-card rounded-2xl p-6">
+                        <div class="flex justify-between items-center mb-4">
+                            <h3 class="font-heading font-bold text-navy"><i class="fas fa-hammer text-navy mr-2"></i> Lengo la Ujenzi</h3>
+                            <span class="text-xs font-bold bg-navy/10 text-navy px-2 py-1 rounded" id="build-percent">0%</span>
+                        </div>
+                        <div class="flex justify-between text-sm mb-2">
+                            <span class="text-slate-500" id="build-collected">TZS 0</span>
+                            <span class="font-semibold text-slate-700" id="build-target-text">Lengo: TZS 50,000,000</span>
+                        </div>
+                        <div class="w-full bg-slate-100 rounded-full h-3 mb-2 overflow-hidden shadow-inner">
+                            <div class="bg-gradient-to-r from-navy to-blue-500 h-3 rounded-full transition-all duration-1000 relative" id="build-bar" style="width: 0%">
+                                <div class="absolute top-0 left-0 w-full h-full bg-white/20 animate-pulse"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent Contributions & Payment Info -->
+                <div class="grid md:grid-cols-3 gap-6">
+                    <div class="md:col-span-2 glass-card rounded-2xl p-6">
+                        <h3 class="font-heading font-bold text-navy mb-4 border-b pb-2"><i class="fas fa-clock text-gold mr-2"></i> Michango ya Hivi Karibuni</h3>
+                        <div id="recent-list" class="space-y-3">
+                            <!-- Populated by JS -->
+                            <div class="text-center py-4 text-slate-400 text-sm" id="empty-recent"><i class="fas fa-folder-open text-3xl mb-2 opacity-50 block"></i> Bado hakuna mchango uliorekodiwa.</div>
+                        </div>
+                    </div>
+                    
+                    <div class="glass-card rounded-2xl p-6 bg-navy text-white">
+                        <h3 class="font-heading font-bold mb-4 text-gold"><i class="fas fa-wallet mr-2"></i> Njia za Malipo</h3>
+                        <ul class="space-y-4 text-sm">
+                            <li class="flex items-center gap-3"><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/1e/M-Pesa_logo.png/600px-M-Pesa_logo.png" class="h-6 bg-white p-1 rounded" alt="M-Pesa"> <span>Namba: <b>0757 344 860</b> (Aloyce)</span></li>
+                            <li class="flex items-center gap-3"><i class="fas fa-mobile-alt text-2xl text-red-500"></i> <span>Airtel Money: <b>TBA</b></span></li>
+                            <li class="flex items-center gap-3"><i class="fas fa-university text-2xl text-blue-400"></i> <span>Benki (CRDB): <b>A/C TBA</b></span></li>
+                        </ul>
+                        <div class="mt-6 text-xs text-slate-400 border-t border-slate-700 pt-4">
+                            * Baada ya kutuma, jaza fomu ya mchango ukiweka namba ya muamala.
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ================= VIEW: FORM ================= -->
+            <section id="view-form" class="view-section">
+                <div class="max-w-2xl mx-auto">
+                    <div class="glass-card rounded-2xl shadow-xl overflow-hidden">
+                        <div class="gradient-bg p-6 text-white text-center">
+                            <h2 class="font-heading text-2xl font-bold text-gold">Toa Mchango</h2>
+                            <p class="text-sm text-slate-300 mt-1">Jaza taarifa zako hapa chini kurekodi mchango wako.</p>
+                        </div>
+                        <form id="contribution-form" class="p-6 md:p-8 space-y-5">
+                            <div class="grid md:grid-cols-2 gap-5">
+                                <div>
+                                    <label class="block text-sm font-semibold text-slate-700 mb-1">Jina Kamili *</label>
+                                    <input type="text" id="f-name" required class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange focus:border-orange outline-none transition bg-slate-50">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-semibold text-slate-700 mb-1">Namba ya Simu *</label>
+                                    <input type="tel" id="f-phone" required placeholder="07xx xxx xxx" class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange focus:border-orange outline-none transition bg-slate-50">
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-semibold text-slate-700 mb-1">Kiasi cha Mchango (TZS) *</label>
+                                <div class="relative">
+                                    <span class="absolute left-4 top-2 font-bold text-slate-400">TZS</span>
+                                    <input type="number" id="f-amount" required min="1000" class="w-full pl-12 pr-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange focus:border-orange outline-none transition bg-slate-50 text-lg font-bold">
+                                </div>
+                            </div>
+
+                            <div class="grid md:grid-cols-2 gap-5">
+                                <div>
+                                    <label class="block text-sm font-semibold text-slate-700 mb-1">Mchango kwa ajili ya: *</label>
+                                    <select id="f-project" required class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange focus:border-orange outline-none transition bg-slate-50">
+                                        <option value="">Chagua Mradi...</option>
+                                        <option value="land">Ununuzi wa Kiwanja</option>
+                                        <option value="construction">Ujenzi wa Nyumba ya Mungu</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-semibold text-slate-700 mb-1">Njia ya Malipo: *</label>
+                                    <select id="f-method" required class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange focus:border-orange outline-none transition bg-slate-50">
+                                        <option value="">Chagua Njia...</option>
+                                        <option value="M-Pesa">M-Pesa</option>
+                                        <option value="Airtel Money">Airtel Money</option>
+                                        <option value="Tigo Pesa">Tigo Pesa</option>
+                                        <option value="HaloPesa">HaloPesa</option>
+                                        <option value="Bank">Benki</option>
+                                        <option value="Cash">Cash (Taslimu)</option>
+                                        <option value="Other">Nyingine</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="grid md:grid-cols-2 gap-5">
+                                <div>
+                                    <label class="block text-sm font-semibold text-slate-700 mb-1">Namba ya Muamala (Reference)</label>
+                                    <input type="text" id="f-ref" placeholder="Mf. 9G3HXYZ..." class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange focus:border-orange outline-none transition bg-slate-50">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-semibold text-slate-700 mb-1">Tarehe ya Mchango *</label>
+                                    <input type="date" id="f-date" required class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange focus:border-orange outline-none transition bg-slate-50">
+                                </div>
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-semibold text-slate-700 mb-1">Maelezo ya Ziada (Hiari)</label>
+                                <textarea id="f-notes" rows="2" class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange focus:border-orange outline-none transition bg-slate-50"></textarea>
+                            </div>
+
+                            <div id="form-error" class="hidden bg-red-100 text-red-700 p-3 rounded text-sm text-center font-medium"></div>
+
+                            <button type="submit" id="btn-submit" class="w-full gradient-bg hover:bg-navy text-white font-bold py-3 px-4 rounded-lg shadow-lg transform transition hover:scale-[1.02] flex justify-center items-center gap-2">
+                                <i class="fas fa-paper-plane"></i> TUMA MCHANGO
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ================= VIEW: RECEIPT MODAL ================= -->
+            <div id="receipt-modal" class="fixed inset-0 bg-slate-900/80 z-50 hidden flex justify-center items-center p-4">
+                <div class="bg-white rounded-xl shadow-2xl max-w-md w-full overflow-hidden animate-fade-in relative" id="receipt-card">
+                    <!-- Receipt Content -->
+                    <div class="p-6 border-b-8 border-gold text-center relative overflow-hidden">
+                        <div class="absolute -right-10 -top-10 text-9xl text-slate-100 opacity-50"><i class="fas fa-certificate"></i></div>
+                        <h2 class="font-heading font-bold text-xl text-navy relative z-10">DISCIPLES COMMUNITY CHURCH</h2>
+                        <p class="text-xs text-slate-500 mb-4 relative z-10">KISESA - MWANZA</p>
+                        <div class="bg-orange text-white text-xs font-bold py-1 px-4 inline-block rounded-full mb-4 uppercase tracking-widest relative z-10">Risiti ya Mchango</div>
+                        
+                        <div class="text-4xl text-green-500 mb-2 relative z-10"><i class="fas fa-check-circle"></i></div>
+                        <div class="text-sm text-slate-600 mb-1 relative z-10">Kiasi (TZS)</div>
+                        <div class="text-3xl font-bold text-navy mb-4 relative z-10" id="r-amount">0</div>
+                        
+                        <div class="bg-slate-50 p-4 rounded-lg text-left text-sm space-y-2 relative z-10 border border-slate-100">
+                            <div class="flex justify-between"><span class="text-slate-500">Jina:</span> <span class="font-bold text-slate-800" id="r-name">-</span></div>
+                            <div class="flex justify-between"><span class="text-slate-500">Simu:</span> <span class="font-medium text-slate-800" id="r-phone">-</span></div>
+                            <div class="flex justify-between"><span class="text-slate-500">Mradi:</span> <span class="font-medium text-slate-800" id="r-project">-</span></div>
+                            <div class="flex justify-between"><span class="text-slate-500">Njia:</span> <span class="font-medium text-slate-800" id="r-method">-</span></div>
+                            <div class="flex justify-between"><span class="text-slate-500">Kumb:</span> <span class="font-mono text-xs text-slate-800 bg-slate-200 px-1 rounded" id="r-ref">-</span></div>
+                            <div class="flex justify-between"><span class="text-slate-500">Tarehe:</span> <span class="font-medium text-slate-800" id="r-date">-</span></div>
+                            <div class="flex justify-between mt-2 pt-2 border-t border-slate-200"><span class="text-slate-500">Status:</span> <span class="font-bold text-orange uppercase tracking-wider text-xs px-2 py-1 bg-orange/10 rounded">Pending Approval</span></div>
+                        </div>
+                    </div>
+                    <!-- Actions -->
+                    <div class="p-4 bg-slate-50 flex gap-3 no-print">
+                        <button onclick="window.print()" class="flex-1 bg-navy hover:bg-slate-800 text-white py-2 rounded font-medium text-sm transition flex items-center justify-center gap-2"><i class="fas fa-print"></i> Print</button>
+                        <button onclick="closeReceipt()" class="flex-1 bg-slate-200 hover:bg-slate-300 text-slate-800 py-2 rounded font-medium text-sm transition">Funga</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ================= VIEW: CONTRIBUTORS ================= -->
+            <section id="view-contributors" class="view-section">
+                <div class="glass-card rounded-2xl p-6">
+                    <div class="flex flex-col md:flex-row justify-between md:items-center gap-4 mb-6">
+                        <h2 class="font-heading font-bold text-2xl text-navy"><i class="fas fa-users text-orange"></i> Wachangiaji Wetu</h2>
+                        <div class="flex gap-2 w-full md:w-auto">
+                            <input type="text" id="search-input" placeholder="Tafuta jina..." class="px-4 py-2 border border-slate-300 rounded-lg text-sm w-full md:w-64 focus:ring-orange focus:border-orange outline-none">
+                            <select id="filter-project" class="px-3 py-2 border border-slate-300 rounded-lg text-sm bg-white">
+                                <option value="all">Wote</option>
+                                <option value="land">Kiwanja tu</option>
+                                <option value="construction">Ujenzi tu</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="overflow-x-auto rounded-lg border border-slate-200">
+                        <table class="w-full text-sm text-left">
+                            <thead class="text-xs text-slate-600 uppercase bg-slate-50 border-b">
+                                <tr>
+                                    <th class="px-4 py-3">Mchangiaji</th>
+                                    <th class="px-4 py-3 text-right">Kiasi (TZS)</th>
+                                    <th class="px-4 py-3">Mradi</th>
+                                    <th class="px-4 py-3">Tarehe</th>
+                                    <th class="px-4 py-3">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="contributors-table-body" class="divide-y divide-slate-100 bg-white">
+                                <!-- Populated by JS -->
+                            </tbody>
+                        </table>
+                        <div id="empty-contributors" class="text-center py-8 text-slate-400 text-sm hidden">
+                            <i class="fas fa-search text-3xl mb-2 block opacity-30"></i> Hakuna rekodi zilizopatikana.
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ================= VIEW: REPORTS ================= -->
+            <section id="view-reports" class="view-section">
+                <h2 class="font-heading font-bold text-2xl text-navy mb-6"><i class="fas fa-chart-pie text-orange"></i> Ripoti ya Michango</h2>
+                
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+                    <div class="glass-card p-4 rounded-xl text-center border-l-4 border-blue-500">
+                        <div class="text-xs text-slate-500 uppercase">Jumla Pending</div>
+                        <div class="text-xl font-bold text-blue-600" id="rep-pending">0</div>
+                    </div>
+                    <div class="glass-card p-4 rounded-xl text-center border-l-4 border-green-500">
+                        <div class="text-xs text-slate-500 uppercase">Jumla Approved</div>
+                        <div class="text-xl font-bold text-green-600" id="rep-approved">0</div>
+                    </div>
+                    <div class="glass-card p-4 rounded-xl text-center border-l-4 border-red-500">
+                        <div class="text-xs text-slate-500 uppercase">Jumla Rejected</div>
+                        <div class="text-xl font-bold text-red-600" id="rep-rejected">0</div>
+                    </div>
+                    <div class="glass-card p-4 rounded-xl text-center border-l-4 border-gold">
+                        <div class="text-xs text-slate-500 uppercase">Malengo (%)</div>
+                        <div class="text-xl font-bold text-gold" id="rep-avg">0%</div>
+                    </div>
+                </div>
+
+                <div class="glass-card rounded-2xl p-6 mb-8 w-full md:w-2/3 mx-auto">
+                    <canvas id="myChart" class="w-full h-64"></canvas>
+                </div>
+            </section>
+
+            <!-- ================= VIEW: LOGIN ================= -->
+            <section id="view-login" class="view-section">
+                <div class="max-w-md mx-auto mt-10">
+                    <div class="glass-card rounded-2xl p-8 shadow-2xl border-t-4 border-navy">
+                        <div class="text-center mb-6">
+                            <i class="fas fa-user-shield text-4xl text-navy mb-2"></i>
+                            <h2 class="font-heading font-bold text-2xl text-navy">Admin Login</h2>
+                            <p class="text-xs text-slate-500">Ingiza taarifa za uongozi kuingia</p>
+                        </div>
+                        <form id="login-form" class="space-y-5">
+                            <div>
+                                <label class="block text-sm font-semibold text-slate-700 mb-1">Username</label>
+                                <div class="relative">
+                                    <span class="absolute left-3 top-2.5 text-slate-400"><i class="fas fa-user"></i></span>
+                                    <input type="text" id="l-user" required class="w-full pl-10 pr-4 py-2 border border-slate-300 rounded-lg outline-none focus:border-navy">
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-semibold text-slate-700 mb-1">Password</label>
+                                <div class="relative">
+                                    <span class="absolute left-3 top-2.5 text-slate-400"><i class="fas fa-lock"></i></span>
+                                    <input type="password" id="l-pass" required class="w-full pl-10 pr-10 py-2 border border-slate-300 rounded-lg outline-none focus:border-navy">
+                                    <button type="button" id="toggle-pass" class="absolute right-3 top-2.5 text-slate-400 hover:text-navy"><i class="fas fa-eye"></i></button>
+                                </div>
+                            </div>
+                            <div id="login-error" class="hidden text-red-500 text-xs font-bold text-center">Taarifa si sahihi!</div>
+                            <button type="submit" class="w-full bg-navy text-white font-bold py-2 rounded-lg shadow hover:bg-slate-800 transition">INGIA</button>
+                        </form>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ================= VIEW: ADMIN DASHBOARD ================= -->
+            <section id="view-admin" class="view-section">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="font-heading font-bold text-2xl text-navy"><i class="fas fa-cogs text-navy"></i> Admin Panel</h2>
+                    <div class="flex gap-2">
+                        <button onclick="exportCSV()" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded text-sm font-medium shadow"><i class="fas fa-file-excel mr-1"></i> Export CSV</button>
+                        <button onclick="logoutAdmin()" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded text-sm font-medium shadow"><i class="fas fa-sign-out-alt"></i></button>
+                    </div>
+                </div>
+
+                <!-- Admin Targets Setup -->
+                <div class="glass-card rounded-xl p-4 mb-6 flex flex-col md:flex-row gap-4 items-end bg-slate-50 border border-slate-200">
+                    <div class="w-full">
+                        <label class="block text-xs font-bold text-slate-600">Lengo Kiwanja (TZS)</label>
+                        <input type="number" id="set-land" class="w-full p-2 border rounded text-sm" value="30000000">
+                    </div>
+                    <div class="w-full">
+                        <label class="block text-xs font-bold text-slate-600">Lengo Ujenzi (TZS)</label>
+                        <input type="number" id="set-build" class="w-full p-2 border rounded text-sm" value="50000000">
+                    </div>
+                    <button onclick="saveTargets()" class="bg-navy text-white px-4 py-2 rounded text-sm whitespace-nowrap">Save Targets</button>
+                </div>
+
+                <div class="glass-card rounded-2xl p-0 overflow-hidden shadow-sm border border-slate-200">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-sm text-left whitespace-nowrap">
+                            <thead class="text-xs text-slate-100 uppercase bg-navy">
+                                <tr>
+                                    <th class="px-4 py-3">Tarehe</th>
+                                    <th class="px-4 py-3">Jina & Simu</th>
+                                    <th class="px-4 py-3 text-right">Kiasi</th>
+                                    <th class="px-4 py-3">Mradi / Njia</th>
+                                    <th class="px-4 py-3 text-center">Status</th>
+                                    <th class="px-4 py-3 text-center">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="admin-table-body" class="divide-y divide-slate-200 bg-white">
+                                <!-- Populated by JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+        </div>
+
+        <!-- Footer -->
+        <footer class="mt-10 py-6 text-center text-slate-500 text-xs no-print border-t border-slate-200">
+            <p class="font-bold text-navy text-sm mb-1">DISCIPLES COMMUNITY CHURCH (DCC) - KISESA MWANZA</p>
+            <p>Pastor Aloyce: 0757 344 860 | "Tujenge Nyumba ya Mungu Pamoja"</p>
+            <p class="mt-2 text-slate-400">Designed by Pastor Aloyce &copy; 2026</p>
+        </footer>
+    </main>
+
+    <!-- Mobile Bottom Navigation -->
+    <nav class="md:hidden fixed bottom-0 w-full bg-white border-t border-slate-200 shadow-[0_-5px_15px_rgba(0,0,0,0.05)] z-40 no-print">
+        <ul class="flex justify-around items-center p-2">
+            <li><a href="#" onclick="navigate('home')" class="flex flex-col items-center p-2 text-slate-500 hover:text-navy" id="nav-m-home"><i class="fas fa-home text-lg mb-1"></i><span class="text-[10px]">Mwanzo</span></a></li>
+            <li><a href="#" onclick="navigate('form')" class="flex flex-col items-center p-2 text-slate-500 hover:text-navy relative" id="nav-m-form">
+                <div class="absolute -top-6 bg-orange text-white w-12 h-12 rounded-full flex items-center justify-center shadow-lg shadow-orange/40 border-4 border-white"><i class="fas fa-plus"></i></div>
+                <span class="text-[10px] mt-6 font-bold text-orange">Mchango</span>
+            </a></li>
+            <li><a href="#" onclick="navigate('contributors')" class="flex flex-col items-center p-2 text-slate-500 hover:text-navy" id="nav-m-users"><i class="fas fa-users text-lg mb-1"></i><span class="text-[10px]">Watu</span></a></li>
+            <li><a href="#" onclick="navigate('reports')" class="flex flex-col items-center p-2 text-slate-500 hover:text-navy" id="nav-m-rep"><i class="fas fa-chart-bar text-lg mb-1"></i><span class="text-[10px]">Ripoti</span></a></li>
+        </ul>
+    </nav>
+
+    <!-- Firebase SDK (Modular) -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, serverTimestamp, updateDoc, doc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        // Firebase Configuration (From prompt)
+        const firebaseConfig = {
+            apiKey: "AIzaSyCv01cdwWFqeDcvMAkILY3K4G8yKJWwL6k",
+            authDomain: "pastoraloyce-3530f.firebaseapp.com",
+            projectId: "pastoraloyce-3530f",
+            storageBucket: "pastoraloyce-3530f.firebasestorage.app",
+            messagingSenderId: "978341477941",
+            appId: "1:978341477941:web:289e3b0671f00e52907b7c",
+            measurementId: "G-XYK8ZL0JSJ"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // Global State
+        let allContributions = [];
+        let landTarget = Number(localStorage.getItem('landTarget')) || 30000000;
+        let buildTarget = Number(localStorage.getItem('buildTarget')) || 50000000;
+        let chartInstance = null;
+
+        // Init Setup
+        document.getElementById('set-land').value = landTarget;
+        document.getElementById('set-build').value = buildTarget;
+        
+        // Expose functions to window for inline onclick handlers
+        window.navigate = function(viewId) {
+            document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
+            document.getElementById('view-' + viewId).classList.add('active');
+            window.scrollTo(0, 0);
+
+            // Access control for admin
+            if(viewId === 'admin' && sessionStorage.getItem('isAdmin') !== 'true') {
+                navigate('login');
+                return;
+            }
+            if(viewId === 'login' && sessionStorage.getItem('isAdmin') === 'true') {
+                navigate('admin');
+                return;
+            }
+            if(viewId === 'reports') renderChart();
+        };
+
+        window.formatMoney = function(amount) {
+            return new Intl.NumberFormat('en-US').format(amount);
+        };
+
+        window.closeReceipt = function() {
+            document.getElementById('receipt-modal').classList.add('hidden');
+            navigate('home');
+        };
+
+        window.saveTargets = function() {
+            landTarget = Number(document.getElementById('set-land').value);
+            buildTarget = Number(document.getElementById('set-build').value);
+            localStorage.setItem('landTarget', landTarget);
+            localStorage.setItem('buildTarget', buildTarget);
+            alert("Malengo yamehifadhiwa!");
+            processData(allContributions); // recalculate bars
+        };
+
+        window.updateStatus = async function(id, newStatus) {
+            if(confirm(`Una uhakika unataka kubadili status kuwa ${newStatus}?`)) {
+                try {
+                    await updateDoc(doc(db, "contributions", id), { status: newStatus });
+                } catch(e) {
+                    alert("Kosa: " + e.message);
+                }
+            }
+        };
+
+        window.deleteRecord = async function(id) {
+            if(confirm("ONYO! Una uhakika unataka kufuta mchango huu moja kwa moja?")) {
+                try {
+                    await deleteDoc(doc(db, "contributions", id));
+                } catch(e) {
+                    alert("Kosa: " + e.message);
+                }
+            }
+        };
+
+        window.logoutAdmin = function() {
+            sessionStorage.removeItem('isAdmin');
+            navigate('home');
+        };
+
+        window.exportCSV = function() {
+            let csvContent = "data:text/csv;charset=utf-8,";
+            csvContent += "Tarehe,Jina,Simu,Kiasi,Mradi,Njia,Reference,Status\n";
+            allContributions.forEach(row => {
+                let dateStr = row.contributionDate || (row.createdAt ? new Date(row.createdAt.seconds*1000).toISOString().split('T')[0] : '');
+                let rArray = [dateStr, row.donorName, row.phone, row.amount, row.project, row.paymentMethod, row.transactionReference, row.status];
+                csvContent += rArray.join(",") + "\n";
+            });
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", "dcc_michango_report.csv");
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        };
+
+        // Form Submit
+        document.getElementById('contribution-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('btn-submit');
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Inatuma...';
+            btn.disabled = true;
+
+            const amount = Number(document.getElementById('f-amount').value);
+            const project = document.getElementById('f-project').value;
+            const refNo = document.getElementById('f-ref').value || `DCC-${Date.now().toString().slice(-6)}`;
+
+            const data = {
+                donorName: document.getElementById('f-name').value,
+                phone: document.getElementById('f-phone').value,
+                amount: amount,
+                project: project,
+                paymentMethod: document.getElementById('f-method').value,
+                transactionReference: refNo,
+                contributionDate: document.getElementById('f-date').value,
+                notes: document.getElementById('f-notes').value,
+                status: "pending",
+                createdAt: serverTimestamp()
+            };
+
+            try {
+                await addDoc(collection(db, "contributions"), data);
+                
+                // Show Receipt
+                document.getElementById('r-name').innerText = data.donorName;
+                document.getElementById('r-phone').innerText = data.phone;
+                document.getElementById('r-amount').innerText = formatMoney(data.amount);
+                document.getElementById('r-project').innerText = data.project === 'land' ? 'Kiwanja' : 'Ujenzi';
+                document.getElementById('r-method').innerText = data.paymentMethod;
+                document.getElementById('r-ref').innerText = data.transactionReference;
+                document.getElementById('r-date').innerText = data.contributionDate;
+                
+                document.getElementById('contribution-form').reset();
+                
+                // Set default date to today for next time
+                document.getElementById('f-date').valueAsDate = new Date();
+                
+                document.getElementById('receipt-modal').classList.remove('hidden');
+                
+            } catch (error) {
+                console.error(error);
+                const errDiv = document.getElementById('form-error');
+                errDiv.innerText = "Samahani, mchango haukuweza kuhifadhiwa. Tafadhali jaribu tena.";
+                errDiv.classList.remove('hidden');
+            } finally {
+                btn.innerHTML = '<i class="fas fa-paper-plane"></i> TUMA MCHANGO';
+                btn.disabled = false;
+            }
+        });
+
+        // Set default date on form
+        document.getElementById('f-date').valueAsDate = new Date();
+
+        // Login Logic
+        document.getElementById('login-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const u = document.getElementById('l-user').value;
+            const p = document.getElementById('l-pass').value;
+            if(u === 'Kiwanja Project' && p === 'Pastor@kiwanja') {
+                sessionStorage.setItem('isAdmin', 'true');
+                document.getElementById('login-form').reset();
+                document.getElementById('login-error').classList.add('hidden');
+                navigate('admin');
+            } else {
+                document.getElementById('login-error').classList.remove('hidden');
+            }
+        });
+
+        // Password Toggle
+        document.getElementById('toggle-pass').addEventListener('click', () => {
+            const inp = document.getElementById('l-pass');
+            const icon = document.querySelector('#toggle-pass i');
+            if(inp.type === 'password') {
+                inp.type = 'text';
+                icon.classList.replace('fa-eye', 'fa-eye-slash');
+            } else {
+                inp.type = 'password';
+                icon.classList.replace('fa-eye-slash', 'fa-eye');
+            }
+        });
+
+        // Search & Filter Listeners
+        document.getElementById('search-input').addEventListener('input', () => renderContributors(allContributions));
+        document.getElementById('filter-project').addEventListener('change', () => renderContributors(allContributions));
+
+        // Realtime Listener
+        const q = query(collection(db, "contributions"), orderBy("createdAt", "desc"));
+        onSnapshot(q, (snapshot) => {
+            const contributions = [];
+            snapshot.forEach((doc) => {
+                contributions.push({ id: doc.id, ...doc.data() });
+            });
+            allContributions = contributions;
+            processData(contributions);
+            renderContributors(contributions);
+            renderAdmin(contributions);
+        }, (error) => {
+            console.error("Firebase Read Error:", error);
+        });
+
+        // Core Data Processing Logic
+        function processData(data) {
+            let total = 0, land = 0, build = 0, count = 0;
+            let p_pend = 0, p_appr = 0, p_rej = 0;
+
+            const recentHtml = [];
+
+            data.forEach(item => {
+                // Report Stats
+                if(item.status === 'pending') p_pend++;
+                if(item.status === 'approved') p_appr++;
+                if(item.status === 'rejected') p_rej++;
+
+                // Public Dashboard uses ONLY Approved
+                if(item.status === 'approved') {
+                    total += Number(item.amount);
+                    if(item.project === 'land') land += Number(item.amount);
+                    if(item.project === 'construction') build += Number(item.amount);
+                    count++;
+
+                    // Add to recent list (Max 5)
+                    if(recentHtml.length < 5) {
+                        const projName = item.project === 'land' ? 'Kiwanja' : 'Ujenzi';
+                        const projIcon = item.project === 'land' ? 'fa-map-marked-alt text-orange' : 'fa-hammer text-navy';
+                        
+                        recentHtml.push(`
+                            <div class="flex justify-between items-center bg-slate-50 p-3 rounded-lg border border-slate-100 hover:shadow-md transition">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-10 h-10 rounded-full bg-white shadow flex items-center justify-center"><i class="fas ${projIcon}"></i></div>
+                                    <div>
+                                        <div class="font-bold text-sm text-navy">${item.donorName}</div>
+                                        <div class="text-[10px] text-slate-500">${item.contributionDate} &bull; ${projName}</div>
+                                    </div>
+                                </div>
+                                <div class="font-bold text-green-600 text-sm">TZS ${formatMoney(item.amount)}</div>
+                            </div>
+                        `);
+                    }
+                }
+            });
+
+            // Update Dash Cards
+            document.getElementById('dash-total').innerText = 'TZS ' + formatMoney(total);
+            document.getElementById('dash-land').innerText = 'TZS ' + formatMoney(land);
+            document.getElementById('dash-build').innerText = 'TZS ' + formatMoney(build);
+            document.getElementById('dash-count').innerText = count;
+
+            // Update Progress Bars
+            let landP = Math.min((land / landTarget) * 100, 100).toFixed(1);
+            let buildP = Math.min((build / buildTarget) * 100, 100).toFixed(1);
+            
+            document.getElementById('land-bar').style.width = landP + '%';
+            document.getElementById('land-percent').innerText = landP + '%';
+            document.getElementById('land-collected').innerText = 'TZS ' + formatMoney(land);
+            document.getElementById('land-target-text').innerText = 'Lengo: TZS ' + formatMoney(landTarget);
+
+            document.getElementById('build-bar').style.width = buildP + '%';
+            document.getElementById('build-percent').innerText = buildP + '%';
+            document.getElementById('build-collected').innerText = 'TZS ' + formatMoney(build);
+            document.getElementById('build-target-text').innerText = 'Lengo: TZS ' + formatMoney(buildTarget);
+
+            // Update Recent
+            const rList = document.getElementById('recent-list');
+            const rEmpty = document.getElementById('empty-recent');
+            if(recentHtml.length > 0) {
+                rList.innerHTML = recentHtml.join('');
+                rEmpty.style.display = 'none';
+            } else {
+                rList.innerHTML = '';
+                rList.appendChild(rEmpty);
+                rEmpty.style.display = 'block';
+            }
+
+            // Update Report Stats
+            document.getElementById('rep-pending').innerText = p_pend;
+            document.getElementById('rep-approved').innerText = p_appr;
+            document.getElementById('rep-rejected').innerText = p_rej;
+            document.getElementById('rep-avg').innerText = ((landP*1 + buildP*1)/2).toFixed(1) + '%';
+            
+            if(document.getElementById('view-reports').classList.contains('active')) renderChart();
+        }
+
+        function renderContributors(data) {
+            const tbody = document.getElementById('contributors-table-body');
+            const empty = document.getElementById('empty-contributors');
+            const term = document.getElementById('search-input').value.toLowerCase();
+            const filter = document.getElementById('filter-project').value;
+            
+            let html = '';
+            let count = 0;
+
+            data.forEach(item => {
+                // Public list only shows APPROVED
+                if(item.status !== 'approved') return;
+                
+                // Filters
+                if(filter !== 'all' && item.project !== filter) return;
+                if(term && !item.donorName.toLowerCase().includes(term) && !item.phone.includes(term) && !(item.transactionReference||'').toLowerCase().includes(term)) return;
+
+                count++;
+                const proj = item.project === 'land' ? '<span class="text-orange text-xs font-bold"><i class="fas fa-map-marked-alt"></i> Kiwanja</span>' : '<span class="text-navy text-xs font-bold"><i class="fas fa-hammer"></i> Ujenzi</span>';
+                
+                html += `
+                    <tr class="hover:bg-slate-50 transition border-b border-slate-50 last:border-0">
+                        <td class="px-4 py-3 font-semibold text-slate-700">${item.donorName}</td>
+                        <td class="px-4 py-3 text-right font-bold text-green-600">${formatMoney(item.amount)}</td>
+                        <td class="px-4 py-3">${proj}</td>
+                        <td class="px-4 py-3 text-xs text-slate-500">${item.contributionDate}</td>
+                        <td class="px-4 py-3"><span class="bg-green-100 text-green-700 px-2 py-1 rounded text-[10px] font-bold uppercase"><i class="fas fa-check"></i> Imethibitishwa</span></td>
+                    </tr>
+                `;
+            });
+
+            tbody.innerHTML = html;
+            if(count === 0) empty.classList.remove('hidden');
+            else empty.classList.add('hidden');
+        }
+
+        function renderAdmin(data) {
+            const tbody = document.getElementById('admin-table-body');
+            let html = '';
+
+            data.forEach(item => {
+                let sColor = item.status === 'approved' ? 'bg-green-100 text-green-700' : (item.status === 'rejected' ? 'bg-red-100 text-red-700' : 'bg-orange/20 text-orange');
+                let proj = item.project === 'land' ? 'Kiwanja' : 'Ujenzi';
+                let dateStr = item.contributionDate || (item.createdAt ? new Date(item.createdAt.seconds*1000).toLocaleDateString() : 'N/A');
+
+                let actionBtns = '';
+                if(item.status === 'pending') {
+                    actionBtns = `
+                        <button onclick="updateStatus('${item.id}', 'approved')" class="text-green-600 hover:bg-green-100 p-1 rounded" title="Approve"><i class="fas fa-check-circle"></i></button>
+                        <button onclick="updateStatus('${item.id}', 'rejected')" class="text-red-600 hover:bg-red-100 p-1 rounded" title="Reject"><i class="fas fa-times-circle"></i></button>
+                    `;
+                } else {
+                    actionBtns = `<button onclick="updateStatus('${item.id}', 'pending')" class="text-slate-500 hover:bg-slate-100 p-1 rounded text-xs" title="Make Pending"><i class="fas fa-undo"></i></button>`;
+                }
+
+                html += `
+                    <tr class="hover:bg-slate-50 border-b border-slate-100">
+                        <td class="px-4 py-2 text-xs text-slate-500">${dateStr}</td>
+                        <td class="px-4 py-2">
+                            <div class="font-bold text-sm text-navy">${item.donorName}</div>
+                            <div class="text-[10px] text-slate-400">${item.phone}</div>
+                        </td>
+                        <td class="px-4 py-2 text-right font-bold text-sm text-green-600">${formatMoney(item.amount)}</td>
+                        <td class="px-4 py-2 text-xs">
+                            <div class="font-bold">${proj}</div>
+                            <div class="text-[10px] text-slate-500">${item.paymentMethod} &bull; ${item.transactionReference||'N/A'}</div>
+                        </td>
+                        <td class="px-4 py-2 text-center">
+                            <span class="${sColor} px-2 py-1 rounded text-[10px] font-bold uppercase">${item.status}</span>
+                        </td>
+                        <td class="px-4 py-2 text-center space-x-1">
+                            ${actionBtns}
+                            <button onclick="deleteRecord('${item.id}')" class="text-red-400 hover:text-red-700 p-1 rounded ml-2" title="Futa"><i class="fas fa-trash"></i></button>
+                        </td>
+                    </tr>
+                `;
+            });
+            tbody.innerHTML = html;
+        }
+
+        function renderChart() {
+            const ctx = document.getElementById('myChart');
+            if(chartInstance) chartInstance.destroy();
+
+            // Group approved amounts by month
+            const monthlyData = { 'Kiwanja': {}, 'Ujenzi': {} };
+            const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+            months.forEach(m => { monthlyData['Kiwanja'][m] = 0; monthlyData['Ujenzi'][m] = 0; });
+
+            allContributions.forEach(item => {
+                if(item.status === 'approved' && item.contributionDate) {
+                    const d = new Date(item.contributionDate);
+                    const mStr = months[d.getMonth()];
+                    const proj = item.project === 'land' ? 'Kiwanja' : 'Ujenzi';
+                    if(monthlyData[proj][mStr] !== undefined) {
+                        monthlyData[proj][mStr] += Number(item.amount);
+                    }
+                }
+            });
+
+            const kiwanjaArr = months.map(m => monthlyData['Kiwanja'][m]);
+            const ujenziArr = months.map(m => monthlyData['Ujenzi'][m]);
+
+            chartInstance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: months,
+                    datasets: [
+                        { label: 'Kiwanja', data: kiwanjaArr, backgroundColor: '#f97316', borderRadius: 4 },
+                        { label: 'Ujenzi', data: ujenziArr, backgroundColor: '#0f172a', borderRadius: 4 }
+                    ]
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    scales: { y: { beginAtZero: true, ticks: { callback: function(val) { return val >= 1000000 ? (val/1000000)+'M' : (val/1000)+'K'; } } } }
+                }
+            });
+        }
+
+    </script>
+</body>
+</html>
