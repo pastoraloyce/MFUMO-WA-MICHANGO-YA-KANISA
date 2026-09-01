@@ -6,11 +6,8 @@
     <title>DCC BUILDING & LAND CONTRIBUTION SYSTEM</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
-    
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@500;600;700&display=swap" rel="stylesheet">
-    
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <script>
@@ -174,14 +171,18 @@
                 </div>
 
                 <div class="grid md:grid-cols-3 gap-6">
+                    <!-- SEHEMU ILIYOBORESHWA: ORODHA YA WOTE WALIOCHANGIA -->
                     <div class="md:col-span-2 glass-card rounded-2xl p-6">
-                        <h3 class="font-heading font-bold text-navy mb-4 border-b pb-2"><i class="fas fa-clock text-gold mr-2"></i> Michango ya Hivi Karibuni</h3>
-                        <div id="recent-list" class="space-y-3">
+                        <div class="flex justify-between items-center mb-4 border-b pb-2">
+                            <h3 class="font-heading font-bold text-navy"><i class="fas fa-list-ol text-gold mr-2"></i> Orodha ya Waliochangia Wote</h3>
+                            <span id="recent-count-badge" class="bg-gold/20 text-navy font-bold text-xs px-3 py-1 rounded-full">0 Michango</span>
+                        </div>
+                        <div id="recent-list" class="space-y-3 max-h-[420px] overflow-y-auto pr-1">
                             <div class="text-center py-4 text-slate-400 text-sm" id="empty-recent"><i class="fas fa-folder-open text-3xl mb-2 opacity-50 block"></i> Bado hakuna mchango uliorekodiwa.</div>
                         </div>
                     </div>
                     
-                    <div class="glass-card rounded-2xl p-6 bg-navy text-white">
+                    <div class="glass-card rounded-2xl p-6 bg-navy text-white h-fit">
                         <h3 class="font-heading font-bold mb-4 text-gold"><i class="fas fa-wallet mr-2"></i> Njia za Malipo</h3>
                         <ul class="space-y-4 text-sm">
                             <li class="flex items-center gap-3"><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/1e/M-Pesa_logo.png/600px-M-Pesa_logo.png" class="h-6 bg-white p-1 rounded" alt="M-Pesa"> <span>Namba: <b>0757 344 860</b> (Aloyce)</span></li>
@@ -812,23 +813,22 @@
                     if(item.project === 'construction') build += Number(item.amount);
                     count++;
 
-                    if(recentHtml.length < 5) {
-                        const projName = item.project === 'land' ? 'Kiwanja' : 'Ujenzi';
-                        const projIcon = item.project === 'land' ? 'fa-map-marked-alt text-orange' : 'fa-hammer text-navy';
-                        
-                        recentHtml.push(`
-                            <div class="flex justify-between items-center bg-slate-50 p-3 rounded-lg border border-slate-100 hover:shadow-md transition">
-                                <div class="flex items-center gap-3">
-                                    <div class="w-10 h-10 rounded-full bg-white shadow flex items-center justify-center"><i class="fas ${projIcon}"></i></div>
-                                    <div>
-                                        <div class="font-bold text-sm text-navy">${item.donorName}</div>
-                                        <div class="text-[10px] text-slate-500">${item.contributionDate} &bull; ${projName}</div>
-                                    </div>
+                    // INAONYESHA MICHANGO YOTE ILIYOTHIBITISHWA (APPROVED)
+                    const projName = item.project === 'land' ? 'Kiwanja' : 'Ujenzi';
+                    const projIcon = item.project === 'land' ? 'fa-map-marked-alt text-orange' : 'fa-hammer text-navy';
+                    
+                    recentHtml.push(`
+                        <div class="flex justify-between items-center bg-slate-50 p-3 rounded-lg border border-slate-100 hover:shadow-md transition">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 rounded-full bg-white shadow flex items-center justify-center"><i class="fas ${projIcon}"></i></div>
+                                <div>
+                                    <div class="font-bold text-sm text-navy">${item.donorName}</div>
+                                    <div class="text-[10px] text-slate-500">${item.contributionDate} &bull; ${projName}</div>
                                 </div>
-                                <div class="font-bold text-green-600 text-sm">TZS ${formatMoney(item.amount)}</div>
                             </div>
-                        `);
-                    }
+                            <div class="font-bold text-green-600 text-sm">TZS ${formatMoney(item.amount)}</div>
+                        </div>
+                    `);
                 }
             });
 
@@ -849,6 +849,12 @@
             document.getElementById('build-percent').innerText = buildP + '%';
             document.getElementById('build-collected').innerText = 'TZS ' + formatMoney(build);
             document.getElementById('build-target-text').innerText = 'Lengo: TZS ' + formatMoney(buildTarget);
+
+            // Weka au Badilisha Idadi kwenye Badge ya Michango
+            const countBadge = document.getElementById('recent-count-badge');
+            if (countBadge) {
+                countBadge.innerText = `${recentHtml.length} Michango`;
+            }
 
             const rList = document.getElementById('recent-list');
             const rEmpty = document.getElementById('empty-recent');
