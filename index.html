@@ -16,7 +16,11 @@
                 extend: {
                     colors: {
                         navy: '#0f172a',
-                        gold: '#eab308',
+                        gold: '#f59e0b',
+                        goldlight: '#fef3c7',
+                        magenta: '#d946ef',
+                        magentalight: '#fae8ff',
+                        purple: '#7e22ce',
                         orange: '#f97316',
                         light: '#f8fafc'
                     },
@@ -40,6 +44,12 @@
         .gradient-bg {
             background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
         }
+        .logo-gradient-bg {
+            background: linear-gradient(135deg, #f59e0b 0%, #d946ef 50%, #7e22ce 100%);
+        }
+        .logo-border-gradient {
+            border-image: linear-gradient(to right, #f59e0b, #d946ef, #7e22ce) 1;
+        }
         
         /* Animations */
         @keyframes fade-in { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
@@ -51,11 +61,41 @@
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
         ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
 
-        /* Print Styles */
+        /* Print Styles - EXACT A4 SINGLE PAGE FIT */
         @media print {
+            @page {
+                size: A4 portrait;
+                margin: 0;
+            }
+            html, body {
+                height: 100%;
+                background: white !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
             body * { visibility: hidden; }
             #receipt-modal, #receipt-modal * { visibility: visible; }
-            #receipt-modal { position: absolute; left: 0; top: 0; width: 100%; box-shadow: none; }
+            #receipt-modal {
+                position: fixed;
+                left: 0;
+                top: 0;
+                width: 210mm;
+                height: 297mm;
+                padding: 10mm;
+                margin: 0;
+                box-shadow: none !important;
+                background: white !important;
+                display: flex !important;
+                justify-content: center;
+                align-items: flex-start;
+            }
+            #receipt-card {
+                width: 100% !important;
+                max-width: 100% !important;
+                box-shadow: none !important;
+                border: 2px solid #e2e8f0 !important;
+                page-break-inside: avoid;
+            }
             .no-print { display: none !important; }
         }
 
@@ -359,33 +399,117 @@
                 </div>
             </div>
 
-            <!-- RISITI MODAL -->
-            <div id="receipt-modal" class="fixed inset-0 bg-slate-900/80 z-50 hidden flex justify-center items-center p-4">
-                <div class="bg-white rounded-xl shadow-2xl max-w-md w-full overflow-hidden animate-fade-in relative" id="receipt-card">
-                    <div class="p-6 border-b-8 border-gold text-center relative overflow-hidden">
-                        <div class="absolute -right-10 -top-10 text-9xl text-slate-100 opacity-50"><i class="fas fa-certificate"></i></div>
-                        <h2 class="font-heading font-bold text-xl text-navy relative z-10">DISCIPLES COMMUNITY CHURCH</h2>
-                        <p class="text-xs text-slate-500 mb-4 relative z-10">KISESA - MWANZA</p>
-                        <div class="bg-orange text-white text-xs font-bold py-1 px-4 inline-block rounded-full mb-4 uppercase tracking-widest relative z-10">Risiti ya Mchango</div>
-                        
-                        <div class="text-4xl text-green-500 mb-2 relative z-10"><i class="fas fa-check-circle"></i></div>
-                        <div class="text-sm text-slate-600 mb-1 relative z-10">Kiasi (TZS)</div>
-                        <div class="text-3xl font-bold text-navy mb-4 relative z-10" id="r-amount">0</div>
-                        
-                        <div class="bg-slate-50 p-4 rounded-lg text-left text-sm space-y-2 relative z-10 border border-slate-100">
-                            <div class="flex justify-between"><span class="text-slate-500">Jina:</span> <span class="font-bold text-slate-800" id="r-name">-</span></div>
-                            <div class="flex justify-between"><span class="text-slate-500">Simu:</span> <span class="font-medium text-slate-800" id="r-phone">-</span></div>
-                            <div class="flex justify-between"><span class="text-slate-500">Mradi:</span> <span class="font-medium text-slate-800" id="r-project">-</span></div>
-                            <div class="flex justify-between"><span class="text-slate-500">Njia:</span> <span class="font-medium text-slate-800" id="r-method">-</span></div>
-                            <div class="flex justify-between"><span class="text-slate-500">Kumb:</span> <span class="font-mono text-xs text-slate-800 bg-slate-200 px-1 rounded" id="r-ref">-</span></div>
-                            <div class="flex justify-between"><span class="text-slate-500">Tarehe:</span> <span class="font-medium text-slate-800" id="r-date">-</span></div>
-                            <div class="flex justify-between mt-2 pt-2 border-t border-slate-200"><span class="text-slate-500">Status:</span> <span class="font-bold text-orange uppercase tracking-wider text-xs px-2 py-1 bg-orange/10 rounded">Pending Approval</span></div>
+            <!-- RISITI MODAL (A4 FORMATTED WITH CHURCH LOGO CONTAINERS) -->
+            <div id="receipt-modal" class="fixed inset-0 bg-slate-900/80 z-50 hidden flex justify-center items-center p-4 overflow-y-auto">
+                <div class="bg-white rounded-2xl shadow-2xl max-w-2xl w-full overflow-hidden animate-fade-in relative border-4 border-slate-100 my-auto" id="receipt-card">
+                    
+                    <!-- HEADER CONTAINER - LOGO GRADIENT -->
+                    <div class="logo-gradient-bg p-6 text-white text-center relative overflow-hidden">
+                        <div class="absolute -right-12 -top-12 text-9xl text-white opacity-10"><i class="fas fa-church"></i></div>
+                        <div class="relative z-10 flex flex-col items-center">
+                            <div class="w-16 h-16 bg-white text-gold rounded-full flex items-center justify-center text-3xl shadow-lg mb-2 border-2 border-gold">
+                                <i class="fas fa-church"></i>
+                            </div>
+                            <h2 class="font-heading font-extrabold text-2xl tracking-wide uppercase text-white drop-shadow-md">DISCIPLES COMMUNITY CHURCH</h2>
+                            <p class="text-xs font-medium tracking-widest text-goldlight uppercase mb-2">(DCC) - KISESA MWANZA</p>
+                            <div class="bg-white text-purple font-bold text-xs py-1 px-6 rounded-full uppercase tracking-widest shadow border border-purple/20">
+                                RISITI YA MCHANGO / RECEIPT
+                            </div>
                         </div>
                     </div>
-                    <div class="p-4 bg-slate-50 flex gap-3 no-print">
-                        <button onclick="window.print()" class="flex-1 bg-navy hover:bg-slate-800 text-white py-2 rounded font-medium text-sm transition flex items-center justify-center gap-2"><i class="fas fa-print"></i> Print</button>
-                        <button onclick="closeReceipt()" class="flex-1 bg-slate-200 hover:bg-slate-300 text-slate-800 py-2 rounded font-medium text-sm transition">Funga</button>
+
+                    <div class="p-6 md:p-8 space-y-5 bg-slate-50/50">
+
+                        <!-- CONTAINER 1: TAARIFA ZA MCHANGAJI (CONTAINER YENYE RANGI YA GOLD) -->
+                        <div class="bg-amber-50/80 border-l-4 border-gold p-4 rounded-xl shadow-sm">
+                            <div class="text-xs font-bold text-amber-800 uppercase tracking-wider mb-2 flex items-center gap-2 border-b border-amber-200/60 pb-1">
+                                <i class="fas fa-user-circle text-gold text-sm"></i> Taarifa za Mchangiaji
+                            </div>
+                            <div class="grid grid-cols-2 gap-4 text-sm">
+                                <div>
+                                    <span class="text-slate-500 text-xs block">Jina Kamili:</span>
+                                    <span class="font-bold text-navy text-base" id="r-name">-</span>
+                                </div>
+                                <div>
+                                    <span class="text-slate-500 text-xs block">Namba ya Simu:</span>
+                                    <span class="font-semibold text-slate-800" id="r-phone">-</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- CONTAINER 2: TAARIFA ZA MCHANGO (CONTAINER YENYE RANGI YA MAGENTA / PURPLE) -->
+                        <div class="bg-purple-50/80 border-l-4 border-magenta p-4 rounded-xl shadow-sm">
+                            <div class="text-xs font-bold text-purple-900 uppercase tracking-wider mb-2 flex items-center gap-2 border-b border-purple-200/60 pb-1">
+                                <i class="fas fa-file-invoice text-magenta text-sm"></i> Muhtasari wa Mchango
+                            </div>
+                            <div class="grid grid-cols-2 md:grid-cols-3 gap-3 text-sm">
+                                <div>
+                                    <span class="text-slate-500 text-xs block">Mradi:</span>
+                                    <span class="font-semibold text-slate-800" id="r-project">-</span>
+                                </div>
+                                <div>
+                                    <span class="text-slate-500 text-xs block">Njia ya Malipo:</span>
+                                    <span class="font-semibold text-slate-800" id="r-method">-</span>
+                                </div>
+                                <div>
+                                    <span class="text-slate-500 text-xs block">Kumbukumbu (Ref):</span>
+                                    <span class="font-mono text-xs font-bold text-slate-800 bg-white px-2 py-0.5 rounded border" id="r-ref">-</span>
+                                </div>
+                                <div>
+                                    <span class="text-slate-500 text-xs block">Tarehe:</span>
+                                    <span class="font-medium text-slate-800" id="r-date">-</span>
+                                </div>
+                                <div class="col-span-2">
+                                    <span class="text-slate-500 text-xs block">Hali ya Malipo (Status):</span>
+                                    <span class="font-bold text-emerald-700 uppercase tracking-wider text-xs px-2.5 py-1 bg-emerald-100 rounded-md inline-block mt-0.5 border border-emerald-200" id="r-status">APPROVED</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- CONTAINER 3: KIASI KILICHOPOKELEWA (HIGHLIGHT CONTAINER) -->
+                        <div class="bg-gradient-to-r from-amber-500 via-magenta to-purple p-0.5 rounded-2xl shadow-md">
+                            <div class="bg-white p-5 rounded-[15px] text-center">
+                                <div class="text-xs font-bold text-slate-500 uppercase tracking-widest mb-1">Jumla ya Kiasi Kilichopokelewa</div>
+                                <div class="text-3xl md:text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-amber-600 via-magenta to-purple">
+                                    TZS <span id="r-amount">0</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- CONTAINER 4: SAHIHI & MUHURI (OFFICIAL FOOTER FOR PRINT) -->
+                        <div class="pt-4 border-t border-slate-200 grid grid-cols-2 gap-8 text-center text-xs text-slate-600">
+                            <div>
+                                <div class="h-10 border-b border-dashed border-slate-400 mb-1 flex items-end justify-center">
+                                    <span class="text-[10px] text-slate-400 italic">Sahihi & Muhuri</span>
+                                </div>
+                                <span class="font-bold text-slate-700 block">Mwekahazina wa Kanisa</span>
+                                <span>DCC Kisesa - Mwanza</span>
+                            </div>
+                            <div>
+                                <div class="h-10 border-b border-dashed border-slate-400 mb-1 flex items-end justify-center">
+                                    <span class="text-[10px] text-slate-400 italic">Sahihi</span>
+                                </div>
+                                <span class="font-bold text-slate-700 block">Mchungaji Kiongozi</span>
+                                <span>Pastor Aloyce (0757 344 860)</span>
+                            </div>
+                        </div>
+
+                        <div class="text-center text-[11px] text-slate-400 italic pt-2">
+                            "Mungu akubariki sana kwa kujitoa kwako katika Ujenzi wa Nyumba ya Bwana."
+                        </div>
+
                     </div>
+
+                    <!-- ACTION BUTTONS -->
+                    <div class="p-4 bg-slate-100 border-t flex gap-3 no-print">
+                        <button onclick="window.print()" class="flex-1 bg-gradient-to-r from-purple to-magenta hover:opacity-90 text-white py-2.5 rounded-xl font-bold text-sm transition shadow flex items-center justify-center gap-2">
+                            <i class="fas fa-print"></i> Print Risiti (A4)
+                        </button>
+                        <button onclick="closeReceipt()" class="flex-1 bg-slate-200 hover:bg-slate-300 text-slate-800 py-2.5 rounded-xl font-bold text-sm transition">
+                            Funga
+                        </button>
+                    </div>
+
                 </div>
             </div>
 
@@ -736,9 +860,37 @@
             return new Intl.NumberFormat('en-US').format(amount || 0);
         };
 
+        // Funzo la kufunga risiti bila kuondoka kwenye ukurasa wa sasa (mfano Admin)
         window.closeReceipt = function() {
             document.getElementById('receipt-modal').classList.add('hidden');
-            navigate('home');
+        };
+
+        // Function ya Ku-Print Risiti kutoka kwenye Admin Panel
+        window.printReceipt = function(id) {
+            const item = allContributions.find(c => c.id === id);
+            if (!item) return;
+
+            document.getElementById('r-name').innerText = item.donorName || '-';
+            document.getElementById('r-phone').innerText = item.phone || '-';
+            document.getElementById('r-amount').innerText = formatMoney(item.amount || 0);
+            document.getElementById('r-project').innerText = item.project === 'land' ? 'Ununuzi wa Kiwanja' : 'Ujenzi wa Kanisa';
+            document.getElementById('r-method').innerText = item.paymentMethod || '-';
+            document.getElementById('r-ref').innerText = item.transactionReference || 'N/A';
+            document.getElementById('r-date').innerText = item.contributionDate || '-';
+            
+            const statusElem = document.getElementById('r-status');
+            if (statusElem) {
+                statusElem.innerText = (item.status || 'pending').toUpperCase();
+                if (item.status === 'approved') {
+                    statusElem.className = 'font-bold text-emerald-700 uppercase tracking-wider text-xs px-2.5 py-1 bg-emerald-100 rounded-md inline-block border border-emerald-200';
+                } else if (item.status === 'rejected') {
+                    statusElem.className = 'font-bold text-red-700 uppercase tracking-wider text-xs px-2.5 py-1 bg-red-100 rounded-md inline-block border border-red-200';
+                } else {
+                    statusElem.className = 'font-bold text-amber-700 uppercase tracking-wider text-xs px-2.5 py-1 bg-amber-100 rounded-md inline-block border border-amber-200';
+                }
+            }
+
+            document.getElementById('receipt-modal').classList.remove('hidden');
         };
 
         // Modal za Ahadi
@@ -987,11 +1139,17 @@
                 document.getElementById('r-name').innerText = data.donorName;
                 document.getElementById('r-phone').innerText = data.phone;
                 document.getElementById('r-amount').innerText = formatMoney(data.amount);
-                document.getElementById('r-project').innerText = data.project === 'land' ? 'Kiwanja' : 'Ujenzi';
+                document.getElementById('r-project').innerText = data.project === 'land' ? 'Ununuzi wa Kiwanja' : 'Ujenzi wa Kanisa';
                 document.getElementById('r-method').innerText = data.paymentMethod;
                 document.getElementById('r-ref').innerText = data.transactionReference;
                 document.getElementById('r-date').innerText = data.contributionDate;
                 
+                const statusElem = document.getElementById('r-status');
+                if (statusElem) {
+                    statusElem.innerText = "PENDING APPROVAL";
+                    statusElem.className = 'font-bold text-amber-700 uppercase tracking-wider text-xs px-2.5 py-1 bg-amber-100 rounded-md inline-block border border-amber-200';
+                }
+
                 document.getElementById('contribution-form').reset();
                 document.getElementById('f-date').valueAsDate = new Date();
                 
@@ -1061,13 +1219,9 @@
             let total = 0, land = 0, build = 0, count = 0, totalPledged = 0;
             let p_pend = 0, p_appr = 0, p_rej = 0;
 
-            // 1. Chuja michango iliyothibitishwa (approved) pekee na yenye kiasi zaidi ya 0
             const approvedContributions = data.filter(item => item.status === 'approved' && Number(item.amount || 0) > 0);
-
-            // 2. Panga michango kuanzia kiasi kikubwa kwenda kiasi kidogo (Descending Order)
             approvedContributions.sort((a, b) => Number(b.amount || 0) - Number(a.amount || 0));
 
-            // 3. Tengeneza HTML ya Orodha ya Michango Zilizothibitishwa
             const recentHtml = approvedContributions.map(item => {
                 const amt = Number(item.amount || 0);
                 const projName = item.project === 'land' ? 'Kiwanja' : 'Ujenzi';
@@ -1087,7 +1241,6 @@
                 `;
             });
 
-            // Hisabu jumla ya takwimu zote
             data.forEach(item => {
                 if(item.status === 'pending') p_pend++;
                 if(item.status === 'approved') p_appr++;
@@ -1150,14 +1303,12 @@
             if(document.getElementById('view-reports').classList.contains('active')) renderChart();
         }
 
-        // RENDER WACHANGIAJI (PANGILIA KUANZIA KUBWA KWENDA NDOGO)
         function renderContributors(data) {
             const tbody = document.getElementById('contributors-table-body');
             const empty = document.getElementById('empty-contributors');
             const term = document.getElementById('search-input').value.toLowerCase();
             const filter = document.getElementById('filter-project').value;
             
-            // Filter approved pekee
             let filteredList = data.filter(item => {
                 if(item.status !== 'approved') return false;
                 if(filter !== 'all' && item.project !== filter) return false;
@@ -1165,18 +1316,16 @@
                 return true;
             });
 
-            // SORT: KUANZIA KIASI KIKUBWA KWENDA KIDOGO
             filteredList.sort((a, b) => {
                 const amountA = Number(a.amount || 0);
                 const amountB = Number(b.amount || 0);
-                return amountB - amountA; // Descending order
+                return amountB - amountA;
             });
 
             let html = '';
             filteredList.forEach((item, index) => {
                 const proj = item.project === 'land' ? '<span class="text-orange text-xs font-bold"><i class="fas fa-map-marked-alt"></i> Kiwanja</span>' : '<span class="text-navy text-xs font-bold"><i class="fas fa-hammer"></i> Ujenzi</span>';
                 
-                // Medali za nafasi za juu
                 let rankBadge = `<span class="font-bold text-slate-500">#${index + 1}</span>`;
                 if(index === 0) rankBadge = `<span class="text-lg">🥇</span>`;
                 else if(index === 1) rankBadge = `<span class="text-lg">🥈</span>`;
@@ -1222,6 +1371,7 @@
                 let callBtn = phoneNum ? `<a href="tel:${phoneNum}" class="text-blue-600 hover:bg-blue-100 p-1 rounded" title="Piga Simu"><i class="fas fa-phone"></i></a>` : '';
                 let smsBtn = phoneNum ? `<a href="sms:${phoneNum}" class="text-emerald-600 hover:bg-emerald-100 p-1 rounded" title="Tuma SMS"><i class="fas fa-comment-dots"></i></a>` : '';
                 let editBtn = `<button onclick="openEditModal('${item.id}')" class="text-amber-600 hover:bg-amber-100 p-1 rounded" title="Hariri (Edit)"><i class="fas fa-edit"></i></button>`;
+                let printBtn = `<button onclick="printReceipt('${item.id}')" class="text-purple hover:bg-purple-100 p-1 rounded" title="Print Risiti"><i class="fas fa-print"></i></button>`;
 
                 html += `
                     <tr class="hover:bg-slate-50 border-b border-slate-100">
@@ -1240,6 +1390,7 @@
                             <span class="${sColor} px-2 py-1 rounded text-[10px] font-bold uppercase">${item.status}</span>
                         </td>
                         <td class="px-4 py-2 text-center space-x-1">
+                            ${printBtn}
                             ${editBtn}
                             ${callBtn}
                             ${smsBtn}
